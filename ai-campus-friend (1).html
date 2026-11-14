@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Campus Friend</title>
+<style>
+  :root{
+    --bg:#ECEAF8; --card:#FFFFFF; --primary:#6C5CE7; --primary-deep:#5A4BD1;
+    --ink:#2D2A45; --sub:#8B87A6; --line:#E6E3F4;
+    --pink:#F26D9C; --green:#22B07D; --blue:#4D9DE0; --orange:#F2994A;
+    --teal:#27C2D6; --yellow:#F2B33D; --purple:#9B59E8; --red:#E74C5B;
+    --r:20px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',-apple-system,sans-serif;}
+  body{background:#CFCBE8;display:flex;justify-content:center;min-height:100vh;}
+  .phone{width:100%;max-width:430px;min-height:100vh;background:linear-gradient(180deg,#E9E6F9 0%,#EFEDFA 30%,#ECEAF8 100%);position:relative;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(80,70,160,.25);}
+  .screen{flex:1;overflow-y:auto;padding-bottom:90px;display:none;}
+  .screen.active{display:block;}
+
+  /* ---------- HOME ---------- */
+  .hero{padding:18px 20px 0;position:relative;background:linear-gradient(180deg,#DEDAF6 0%,rgba(236,234,248,0) 100%);}
+  .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+  .menu-btn,.bell-btn{background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink);position:relative;}
+  .bell-btn .dot{position:absolute;top:-2px;right:-3px;width:9px;height:9px;background:#FF4D4D;border-radius:50%;border:2px solid #E9E6F9;}
+  .greet{display:flex;justify-content:space-between;align-items:flex-start;}
+  .greet h1{font-size:27px;color:var(--ink);letter-spacing:-0.5px;}
+  .greet p{margin-top:8px;font-size:14.5px;line-height:1.55;color:#56527A;}
+  .mascot{font-size:74px;line-height:1;filter:drop-shadow(0 6px 10px rgba(108,92,231,.3));user-select:none;animation:bob 3s ease-in-out infinite;}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .skyline{font-size:20px;opacity:.55;margin-top:6px;letter-spacing:4px;user-select:none;}
+
+  .ask-bar{margin:14px 16px 0;background:var(--card);border-radius:24px;padding:14px 14px 14px 18px;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(108,92,231,.12);cursor:pointer;border:1px solid rgba(255,255,255,.8);}
+  .ask-bar .spark{font-size:20px;color:var(--primary);}
+  .ask-bar .ph{flex:1;}
+  .ask-bar .ph b{display:block;font-size:14.5px;color:var(--ink);font-weight:600;}
+  .ask-bar .ph span{font-size:12.5px;color:var(--sub);}
+  .ask-bar .go{width:44px;height:44px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+
+  .sec-head{display:flex;justify-content:space-between;align-items:center;margin:24px 20px 12px;}
+  .sec-head h2{font-size:18px;color:var(--ink);}
+  .sec-head a{font-size:13px;color:var(--primary);text-decoration:none;font-weight:600;cursor:pointer;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px;}
+  @media(min-width:400px){.grid{grid-template-columns:1fr 1fr 1fr 1fr;}}
+  @media(max-width:399px){.grid{grid-template-columns:1fr 1fr;}}
+  .feat{background:var(--card);border-radius:var(--r);padding:18px 10px 14px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,.9);box-shadow:0 4px 14px rgba(108,92,231,.07);transition:transform .15s, box-shadow .15s;}
+  .feat:active{transform:scale(.96);}
+  .feat:hover{box-shadow:0 8px 20px rgba(108,92,231,.16);transform:translateY(-2px);}
+  .feat .ic{width:52px;height:52px;border-radius:16px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:26px;}
+  .feat h3{font-size:13.5px;color:var(--ink);margin-bottom:5px;font-weight:700;}
+  .feat p{font-size:11px;color:var(--sub);line-height:1.45;}
+
+  .sched-card{margin:0 16px;background:var(--card);border-radius:var(--r);padding:18px;box-shadow:0 4px 14px rgba(108,92,231,.07);}
+  .sched-card .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+  .sched-card .head h2{font-size:16.5px;color:var(--ink);display:flex;align-items:center;gap:8px;}
+  .sched-card .head a{font-size:13px;color:var(--primary);font-weight:600;cursor:pointer;text-decoration:none;}
+  .sch-row{display:flex;gap:12px;padding:9px 0;align-items:flex-start;}
+  .sch-dot{width:9px;height:9px;border-radius:50%;margin-top:6px;flex-shrink:0;}
+  .sch-time{font-size:14px;font-weight:700;color:var(--ink);width:52px;flex-shrink:0;}
+  .sch-info b{display:block;font-size:14.5px;color:var(--ink);font-weight:700;}
+  .sch-info span{font-size:12.5px;color:var(--sub);}
+  .cheer{margin-top:12px;background:#EFEDFB;border-radius:16px;padding:16px;text-align:center;}
+  .cheer .ico{font-size:34px;}
+  .cheer b{display:block;font-size:15px;color:var(--ink);margin-top:6px;}
+  .cheer p{font-size:12.5px;color:var(--sub);margin-top:4px;line-height:1.5;}
+
+  .tip{margin:16px;background:#E3DFF8;border-radius:var(--r);padding:16px;display:flex;align-items:center;gap:12px;}
+  .tip .bulb{font-size:24px;}
+  .tip p{flex:1;font-size:13px;color:#4A4670;line-height:1.5;}
+  .tip button{background:var(--card);border:none;border-radius:20px;padding:10px 14px;font-size:12.5px;font-weight:700;color:var(--primary);cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(108,92,231,.15);}
+
+  /* ---------- BOTTOM NAV ---------- */
+  .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;padding:8px 6px calc(10px + env(safe-area-inset-bottom));z-index:50;}
+  .nav button{flex:1;background:none;border:none;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--sub);font-size:11px;font-weight:600;}
+  .nav button .nic{font-size:21px;}
+  .nav button.on{color:var(--primary);}
+
+  /* ---------- GENERIC PAGE ---------- */
+  .page-head{padding:18px 20px 6px;display:flex;align-items:center;gap:12px;}
+  .page-head h1{font-size:21px;color:var(--ink);}
+  .back{background:var(--card);border:none;width:36px;height:36px;border-radius:12px;font-size:16px;cursor:pointer;color:var(--ink);box-shadow:0 2px 8px rgba(108,92,231,.1);}
+
+  /* ---------- CHAT ---------- */
+  #screen-chat{display:none;flex-direction:column;}
+  #screen-chat.active{display:flex;}
+  .chat-wrap{flex:1;display:flex;flex-direction:column;height:calc(100vh - 0px);}
+  .chat-msgs{flex:1;overflow-y:auto;padding:14px 16px 110px;}
+  .msg{max-width:82%;padding:12px 15px;border-radius:18px;font-size:14.5px;line-height:1.6;margin-bottom:10px;white-space:pre-wrap;word-break:break-word;}
+  .msg.bot{background:var(--card);color:var(--ink);border-bottom-left-radius:6px;box-shadow:0 2px 10px rgba(108,92,231,.08);}
+  .msg.user{background:var(--primary);color:#fff;margin-left:auto;border-bottom-right-radius:6px;}
+  .msg.typing{color:var(--sub);font-style:italic;background:var(--card);}
+  .chips{display:flex;gap:8px;overflow-x:auto;padding:0 16px 10px;scrollbar-width:none;}
+  .chips::-webkit-scrollbar{display:none;}
+  .chip{flex-shrink:0;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:9px 14px;font-size:12.5px;color:var(--primary);font-weight:600;cursor:pointer;}
+  .chip:hover{background:#F1EFFC;}
+  .chat-input{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:10px 14px;background:linear-gradient(180deg,rgba(236,234,248,0),#ECEAF8 35%);z-index:40;}
+  .chat-input .row{display:flex;gap:8px;background:var(--card);border-radius:26px;padding:8px 8px 8px 16px;box-shadow:0 6px 20px rgba(108,92,231,.15);}
+  .chat-input textarea{flex:1;border:none;outline:none;resize:none;font-size:14.5px;color:var(--ink);background:none;max-height:90px;line-height:1.5;padding-top:8px;}
+  .chat-input button{width:40px;height:40px;border-radius:50%;border:none;background:var(--primary);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;align-self:flex-end;}
+  .chat-input button:disabled{background:#C3BCEF;cursor:default;}
+
+  /* ---------- SCHEDULE PAGE ---------- */
+  .sch-list{padding:6px 16px;}
+  .sch-item{background:var(--card);border-radius:16px;padding:14px 16px;display:flex;gap:12px;align-items:center;margin-bottom:10px;box-shadow:0 3px 10px rgba(108,92,231,.07);}
+  .sch-item .t{font-weight:800;color:var(--primary);font-size:15px;width:54px;flex-shrink:0;}
+  .sch-item .d{flex:1;}
+  .sch-item .d b{display:block;font-size:14.5px;color:var(--ink);}
+  .sch-item .d span{font-size:12.5px;color:var(--sub);}
+  .sch-item .del{background:none;border:none;color:#D9D5EE;font-size:17px;cursor:pointer;}
+  .sch-item .del:hover{color:var(--red);}
+  .add-form{margin:10px 16px;background:var(--card);border-radius:var(--r);padding:16px;box-shadow:0 3px 10px rgba(108,92,231,.07);}
+  .add-form h3{font-size:15px;color:var(--ink);margin-bottom:10px;}
+  .add-form input{width:100%;border:1.5px solid var(--line);border-radius:12px;padding:11px 13px;font-size:14px;margin-bottom:9px;outline:none;color:var(--ink);background:#FBFAFE;}
+  .add-form input:focus{border-color:var(--primary);}
+  .add-form .btn{width:100%;background:var(--primary);color:#fff;border:none;border-radius:12px;padding:13px;font-size:14.5px;font-weight:700;cursor:pointer;}
+  .empty{text-align:center;color:var(--sub);font-size:13.5px;padding:30px 20px;line-height:1.6;}
+
+  /* ---------- MATERIALS ---------- */
+  .mat-item{background:var(--card);border-radius:16px;padding:14px 16px;display:flex;gap:12px;align-items:center;margin:0 16px 10px;box-shadow:0 3px 10px rgba(108,92,231,.07);}
+  .mat-item .fic{font-size:24px;}
+  .mat-item .d{flex:1;}
+  .mat-item .d b{display:block;font-size:14px;color:var(--ink);}
+  .mat-item .d span{font-size:12px;color:var(--sub);}
+
+  /* ---------- MYPAGE ---------- */
+  .profile{margin:10px 16px;background:var(--card);border-radius:var(--r);padding:22px;text-align:center;box-shadow:0 3px 10px rgba(108,92,231,.07);}
+  .avatar{width:74px;height:74px;border-radius:50%;background:linear-gradient(135deg,#8E7CF3,#6C5CE7);display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 12px;color:#fff;}
+  .profile h2{font-size:19px;color:var(--ink);}
+  .profile p{font-size:13px;color:var(--sub);margin-top:4px;}
+  .stats{display:flex;gap:10px;margin:14px 16px;}
+  .stat{flex:1;background:var(--card);border-radius:16px;padding:16px 10px;text-align:center;box-shadow:0 3px 10px rgba(108,92,231,.07);}
+  .stat b{display:block;font-size:21px;color:var(--primary);}
+  .stat span{font-size:11.5px;color:var(--sub);}
+  .menu-list{margin:6px 16px;}
+  .menu-item{background:var(--card);border-radius:14px;padding:15px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px;font-size:14.5px;color:var(--ink);cursor:pointer;box-shadow:0 2px 8px rgba(108,92,231,.05);}
+  .menu-item .arr{margin-left:auto;color:#C9C4E6;}
+
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:11px 20px;border-radius:22px;font-size:13.5px;z-index:99;opacity:0;transition:opacity .3s;pointer-events:none;}
+  .toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ============ HOME ============ -->
+  <div class="screen active" id="screen-home">
+    <div class="hero">
+      <div class="topbar">
+        <button class="menu-btn">☰</button>
+        <button class="bell-btn" onclick="toast('새 알림이 없어요!')">🔔<span class="dot"></span></button>
+      </div>
+      <div class="greet">
+        <div>
+          <h1>안녕하세요, <span id="userName">Minjun</span>! 👋</h1>
+          <p>AI Campus Friend가<br>한국 대학 생활을 더 쉽게 도와드릴게요!</p>
+          <div class="skyline">🌸🏯🏙️🗼🌸</div>
+        </div>
+        <div class="mascot">🤖</div>
+      </div>
+    </div>
+
+    <div class="ask-bar" onclick="openChat()">
+      <span class="spark">✨</span>
+      <div class="ph"><b>무엇을 도와드릴까요?</b><span>예: "강의 내용 번역해줘"</span></div>
+      <div class="go">💬</div>
+    </div>
+
+    <div class="sec-head"><h2>주요 기능</h2><a onclick="toast('모든 기능이 표시되어 있어요!')">전체 보기 ›</a></div>
+    <div class="grid">
+      <div class="feat" onclick="openChat('번역하고 싶은 한국어 문장이나 텍스트를 입력해 주세요! 사진 속 텍스트도 입력해 주시면 번역해 드려요.')">
+        <div class="ic" style="background:#EEEBFD">🈯</div><h3>실시간 한국어 번역</h3><p>텍스트, 음성, 사진 번역</p>
+      </div>
+      <div class="feat" onclick="openChat('어떤 과목 공부를 도와드릴까요? 강의 요약, 과제 도움, 시험 준비 모두 가능해요! 📚')">
+        <div class="ic" style="background:#E5F7F0">🎓</div><h3>AI 학업 도우미</h3><p>강의 요약, 과제 도움, 시험 준비</p>
+      </div>
+      <div class="feat" onclick="openChat('캠퍼스 생활에 대해 궁금한 점을 물어보세요! 도서관, 학식, 교통, 기숙사 등 무엇이든 알려드려요 🏫')">
+        <div class="ic" style="background:#E7F1FB">🏛️</div><h3>캠퍼스 가이드</h3><p>시설, 서비스, 교통, 생활 정보</p>
+      </div>
+      <div class="feat" onclick="openChat('한국 문화나 예절에 대해 궁금한 점이 있으신가요? 존댓말, 회식 문화, 선후배 관계 등 무엇이든 물어보세요! 🇰🇷')">
+        <div class="ic" style="background:#FDF0E3">👥</div><h3>문화 적응 코치</h3><p>한국 문화, 예절, 생활 팁</p>
+      </div>
+      <div class="feat" onclick="go('sched')">
+        <div class="ic" style="background:#FDEBF1">📅</div><h3>스마트 일정 관리</h3><p>수업, 과제, 시험 일정 관리</p>
+      </div>
+      <div class="feat" onclick="openChat()">
+        <div class="ic" style="background:#E3F6FA">💬</div><h3>AI 챗봇 상담</h3><p>24/7 질문 지원 및 고민 상담</p>
+      </div>
+      <div class="feat" onclick="go('mat')">
+        <div class="ic" style="background:#FEF5E0">📁</div><h3>내 학습 자료</h3><p>파일 저장, 정리, 언제든지 열람</p>
+      </div>
+      <div class="feat" onclick="openChat('긴급 상황이신가요? 한국의 비상 연락처를 알려드릴게요:\n\n🚨 경찰: 112\n🚑 응급/화재: 119\n🌐 외국인 종합 안내(다국어): 1345\n🏥 의료 통역 지원: 1339\n\n어떤 도움이 필요하신지 알려주세요!')">
+        <div class="ic" style="background:#F3EBFD">📍</div><h3>긴급 도움</h3><p>비상 연락처, 안전 정보, 위치 서비스</p>
+      </div>
+    </div>
+
+    <div class="sec-head" style="margin-bottom:0"><div></div></div>
+    <div class="sched-card">
+      <div class="head"><h2>📅 오늘의 일정</h2><a onclick="go('sched')">더보기 ›</a></div>
+      <div id="homeSched"></div>
+      <div class="cheer">
+        <div class="ico">📋⏰</div>
+        <b>오늘도 화이팅! 💜</b>
+        <p>계획적으로 공부하고<br>즐거운 하루 보내세요!</p>
+      </div>
+    </div>
+
+    <div class="tip">
+      <span class="bulb">💡</span>
+      <p>팁: 강의 노트나 슬라이드 내용을 붙여넣으면 AI가 핵심 내용을 요약해 드려요!</p>
+      <button onclick="openChat('요약하고 싶은 강의 노트나 텍스트를 붙여넣어 주세요! 핵심 내용을 정리해 드릴게요 ✍️')">바로 사용해보기 ›</button>
+    </div>
+  </div>
+
+  <!-- ============ CHAT ============ -->
+  <div class="screen" id="screen-chat">
+    <div class="page-head">
+      <button class="back" onclick="go('home')">←</button>
+      <h1>🤖 AI 챗봇 상담</h1>
+    </div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="chat-input">
+      <div class="chips">
+        <div class="chip" onclick="quick('이 문장을 영어로 번역해줘: ')">🈯 번역 요청</div>
+        <div class="chip" onclick="quick('한국 대학교 회식 문화에 대해 알려줘')">🍻 회식 문화</div>
+        <div class="chip" onclick="quick('교수님께 이메일 쓰는 법 알려줘')">📧 교수님 이메일</div>
+        <div class="chip" onclick="quick('외국인등록증 발급 방법 알려줘')">🪪 외국인등록증</div>
+        <div class="chip" onclick="quick('한국어 존댓말 사용법 알려줘')">🙇 존댓말</div>
+      </div>
+      <div class="row">
+        <textarea id="chatBox" rows="1" placeholder="메시지를 입력하세요..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+        <button id="sendBtn" onclick="sendMsg()">➤</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ SCHEDULE ============ -->
+  <div class="screen" id="screen-sched">
+    <div class="page-head">
+      <button class="back" onclick="go('home')">←</button>
+      <h1>📅 스마트 일정 관리</h1>
+    </div>
+    <div class="sch-list" id="schList"></div>
+    <div class="add-form">
+      <h3>＋ 새 일정 추가</h3>
+      <input id="fTime" type="time" value="10:00">
+      <input id="fTitle" placeholder="일정 제목 (예: 한국어 회화 수업)">
+      <input id="fPlace" placeholder="장소 (예: 인문관 101호)">
+      <button class="btn" onclick="addSched()">일정 추가하기</button>
+    </div>
+  </div>
+
+  <!-- ============ MATERIALS ============ -->
+  <div class="screen" id="screen-mat">
+    <div class="page-head">
+      <button class="back" onclick="go('home')">←</button>
+      <h1>📁 내 학습 자료</h1>
+    </div>
+    <div id="matList"></div>
+    <div class="add-form" style="margin-top:4px">
+      <h3>＋ 자료 메모 추가</h3>
+      <input id="mTitle" placeholder="자료 이름 (예: 데이터구조 3주차 노트)">
+      <button class="btn" onclick="addMat()">추가하기</button>
+    </div>
+    <div class="tip" style="margin-top:14px">
+      <span class="bulb">💡</span>
+      <p>자료 내용을 AI 챗봇에 붙여넣으면 요약, 번역, 퀴즈 생성까지 도와드려요!</p>
+      <button onclick="openChat('학습 자료를 붙여넣어 주세요! 요약하거나 번역하거나 퀴즈를 만들어 드릴게요 📚')">AI로 분석 ›</button>
+    </div>
+  </div>
+
+  <!-- ============ MYPAGE ============ -->
+  <div class="screen" id="screen-my">
+    <div class="page-head">
+      <button class="back" onclick="go('home')">←</button>
+      <h1>👤 마이페이지</h1>
+    </div>
+    <div class="profile">
+      <div class="avatar">🧑‍🎓</div>
+      <h2 id="profName">Minjun</h2>
+      <p>한국대학교 · 컴퓨터공학과 · 교환학생</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="stChat">0</b><span>AI 대화</span></div>
+      <div class="stat"><b id="stSched">0</b><span>등록된 일정</span></div>
+      <div class="stat"><b id="stMat">0</b><span>학습 자료</span></div>
+    </div>
+    <div class="menu-list">
+      <div class="menu-item" onclick="renameUser()">✏️ 이름 변경<span class="arr">›</span></div>
+      <div class="menu-item" onclick="toast('한국어/English 지원 예정!')">🌐 언어 설정<span class="arr">›</span></div>
+      <div class="menu-item" onclick="toast('알림 설정이 켜져 있어요!')">🔔 알림 설정<span class="arr">›</span></div>
+      <div class="menu-item" onclick="openChat('앱 사용법에 대해 궁금한 점을 물어보세요!')">❓ 도움말<span class="arr">›</span></div>
+    </div>
+  </div>
+
+  <!-- ============ NAV ============ -->
+  <div class="nav">
+    <button id="nav-home" class="on" onclick="go('home')"><span class="nic">🏠</span>홈</button>
+    <button id="nav-chat" onclick="openChat()"><span class="nic">💬</span>채팅</button>
+    <button id="nav-sched" onclick="go('sched')"><span class="nic">📅</span>일정</button>
+    <button id="nav-mat" onclick="go('mat')"><span class="nic">📁</span>자료실</button>
+    <button id="nav-my" onclick="go('my')"><span class="nic">👤</span>마이페이지</button>
+  </div>
+
+  <div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ================= STATE ================= */
+let userName = "Minjun";
+let chatHistory = [];   // {role, content}
+let chatCount = 0;
+let schedule = [
+  {time:"09:00", title:"한국어 회화 수업", place:"인문관 101호", c:"#6C5CE7"},
+  {time:"11:00", title:"데이터 구조", place:"공학관 302호", c:"#B08D2E"},
+  {time:"14:00", title:"도서관 스터디 그룹", place:"중앙 도서관 3층", c:"#8E7CF3"},
+  {time:"16:00", title:"교수님 상담", place:"교수 연구실", c:"#E0B341"},
+];
+let materials = [
+  {title:"한국어 회화 5과 단어장", date:"오늘"},
+  {title:"데이터구조 중간고사 요약본", date:"어제"},
+];
+
+const SYSTEM_PROMPT = `You are "AI Campus Friend" (AI 캠퍼스 프렌드), a warm and helpful assistant inside a mobile app for international/foreign students studying at Korean universities. Your job:
+
+1. 실시간 번역 (Translation): Translate between Korean and the student's language. Explain nuances, honorifics, and slang.
+2. AI 학업 도우미 (Study helper): Summarize lectures, help with assignments, explain concepts, create study quizzes, help prepare for exams.
+3. 캠퍼스 가이드 (Campus guide): Explain Korean university systems — 수강신청 (course registration), 학식 (cafeteria), 도서관, GPA/학점, 장학금 (scholarships), MT, 동아리 (clubs), dormitories.
+4. 문화 적응 코치 (Culture coach): Korean etiquette, 존댓말 (honorifics), 회식 culture, 선배/후배 relationships, dining etiquette, how to email professors politely.
+5. 생활 도움 (Life help): visa/외국인등록증 (ARC), banking, phone plans, T-money/transport, hospitals, emergency numbers (112 police, 119 fire/ambulance, 1345 immigration helpline, 1339 medical).
+
+Style: Friendly, encouraging, use occasional emoji 💜. Detect the user's language and reply in it (if they write English, reply mainly in English with Korean terms + romanization in parentheses). Keep answers concise and practical for mobile reading. When writing Korean example sentences, include translations. Never invent specific facts about a particular university — give general guidance and suggest checking the school's 국제처 (Office of International Affairs) when details vary by school. The user's name is ${"${userName}"}.`;
+
+/* ================= NAV ================= */
+function go(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('on'));
+  const nav = document.getElementById('nav-'+name);
+  if(nav) nav.classList.add('on');
+  if(name==='home') renderHomeSched();
+  if(name==='sched') renderSched();
+  if(name==='mat') renderMat();
+  if(name==='my') renderMy();
+  window.scrollTo(0,0);
+}
+
+function openChat(botGreeting){
+  go('chat');
+  document.getElementById('nav-chat').classList.add('on');
+  if(chatHistory.length===0 && !botGreeting){
+    botGreeting = `안녕하세요, ${userName}님! 👋 저는 AI Campus Friend예요.\n\n번역, 공부, 캠퍼스 생활, 한국 문화 — 무엇이든 물어보세요! 💜\n\nHi! I can also chat in English (or any language). How can I help you today?`;
+  }
+  if(botGreeting){
+    addMsg('bot', botGreeting);
+  }
+  setTimeout(()=>document.getElementById('chatBox').focus(), 200);
+}
+
+/* ================= CHAT ================= */
+function addMsg(who, text){
+  const m = document.createElement('div');
+  m.className = 'msg ' + who;
+  m.textContent = text;
+  document.getElementById('chatMsgs').appendChild(m);
+  m.scrollIntoView({behavior:'smooth', block:'end'});
+  return m;
+}
+
+function quick(text){
+  const box = document.getElementById('chatBox');
+  box.value = text;
+  box.focus();
+}
+
+async function sendMsg(){
+  const box = document.getElementById('chatBox');
+  const text = box.value.trim();
+  if(!text) return;
+  box.value = '';
+  addMsg('user', text);
+  chatHistory.push({role:'user', content:text});
+  chatCount++;
+
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  const typing = addMsg('bot typing', 'AI가 생각하고 있어요... 💭');
+
+  try{
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        model:"claude-sonnet-4-6",
+        max_tokens:1000,
+        system: SYSTEM_PROMPT.replace('${userName}', userName),
+        messages: chatHistory.slice(-20)
+      })
+    });
+    const data = await response.json();
+    const reply = (data.content||[]).map(i=>i.type==='text'?i.text:'').filter(Boolean).join('\n')
+                  || '죄송해요, 응답을 받지 못했어요. 다시 시도해 주세요! 🙏';
+    typing.remove();
+    addMsg('bot', reply);
+    chatHistory.push({role:'assistant', content:reply});
+  }catch(err){
+    typing.remove();
+    addMsg('bot', '⚠️ 연결에 문제가 생겼어요. 잠시 후 다시 시도해 주세요!\n(Connection error — please try again.)');
+  }
+  btn.disabled = false;
+}
+
+/* ================= SCHEDULE ================= */
+function sortSched(){ schedule.sort((a,b)=>a.time.localeCompare(b.time)); }
+
+function renderHomeSched(){
+  sortSched();
+  const el = document.getElementById('homeSched');
+  if(schedule.length===0){ el.innerHTML = '<div class="empty">오늘 일정이 없어요!<br>일정 탭에서 추가해 보세요 ✨</div>'; return; }
+  el.innerHTML = schedule.slice(0,4).map(s=>`
+    <div class="sch-row">
+      <div class="sch-dot" style="background:${s.c||'#6C5CE7'}"></div>
+      <div class="sch-time">${s.time}</div>
+      <div class="sch-info"><b>${esc(s.title)}</b><span>${esc(s.place)}</span></div>
+    </div>`).join('');
+}
+
+function renderSched(){
+  sortSched();
+  const el = document.getElementById('schList');
+  if(schedule.length===0){ el.innerHTML='<div class="empty">아직 일정이 없어요.<br>아래에서 첫 일정을 추가해 보세요! ✨</div>'; return; }
+  el.innerHTML = schedule.map((s,i)=>`
+    <div class="sch-item">
+      <div class="t">${s.time}</div>
+      <div class="d"><b>${esc(s.title)}</b><span>📍 ${esc(s.place)}</span></div>
+      <button class="del" onclick="delSched(${i})">✕</button>
+    </div>`).join('');
+}
+
+function addSched(){
+  const time = document.getElementById('fTime').value;
+  const title = document.getElementById('fTitle').value.trim();
+  const place = document.getElementById('fPlace').value.trim() || '장소 미정';
+  if(!title){ toast('일정 제목을 입력해 주세요!'); return; }
+  const colors = ['#6C5CE7','#F26D9C','#22B07D','#F2994A','#27C2D6'];
+  schedule.push({time, title, place, c:colors[Math.floor(Math.random()*colors.length)]});
+  document.getElementById('fTitle').value=''; document.getElementById('fPlace').value='';
+  renderSched(); toast('일정이 추가되었어요! ✅');
+}
+
+function delSched(i){ schedule.splice(i,1); renderSched(); toast('일정이 삭제되었어요'); }
+
+/* ================= MATERIALS ================= */
+function renderMat(){
+  const el = document.getElementById('matList');
+  if(materials.length===0){ el.innerHTML='<div class="empty">저장된 자료가 없어요.<br>아래에서 추가해 보세요! 📁</div>'; return; }
+  el.innerHTML = materials.map((m,i)=>`
+    <div class="mat-item">
+      <span class="fic">📄</span>
+      <div class="d"><b>${esc(m.title)}</b><span>${m.date}</span></div>
+      <button class="del" style="background:none;border:none;color:#D9D5EE;font-size:16px;cursor:pointer" onclick="delMat(${i})">✕</button>
+    </div>`).join('');
+}
+function addMat(){
+  const t = document.getElementById('mTitle').value.trim();
+  if(!t){ toast('자료 이름을 입력해 주세요!'); return; }
+  materials.unshift({title:t, date:'오늘'});
+  document.getElementById('mTitle').value='';
+  renderMat(); toast('자료가 추가되었어요! 📁');
+}
+function delMat(i){ materials.splice(i,1); renderMat(); }
+
+/* ================= MYPAGE ================= */
+function renderMy(){
+  document.getElementById('stChat').textContent = chatCount;
+  document.getElementById('stSched').textContent = schedule.length;
+  document.getElementById('stMat').textContent = materials.length;
+  document.getElementById('profName').textContent = userName;
+}
+function renameUser(){
+  const n = prompt('새 이름을 입력해 주세요:', userName);
+  if(n && n.trim()){ userName = n.trim();
+    document.getElementById('userName').textContent = userName;
+    renderMy(); toast('이름이 변경되었어요! ✅');
+  }
+}
+
+/* ================= UTIL ================= */
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+let toastTimer;
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+renderHomeSched();
+</script>
+</body>
+</html>
